@@ -1,0 +1,97 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+/* ---------------------------------------------------------------------
+   Pace — Warm Momentum design tokens
+   Single source of truth. Components should reference these via the
+   generated Tailwind utilities (bg-pace-primary, text-pace-ink, etc.)
+   or the CSS custom properties directly — never hardcode hex values.
+--------------------------------------------------------------------- */
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --color-pace-ink: #1f2933;
+  --color-pace-muted: #62707c;
+  --color-pace-canvas: #f8f7f2;
+  --color-pace-surface: #ffffff;
+  --color-pace-line: #e4e6e1;
+  --color-pace-primary: #e85d3f;
+  --color-pace-primary-strong: #c8462d;
+  --color-pace-positive: #2d8a69;
+  --color-pace-positive-tint: #e6f3ed;
+  --color-pace-pending: #b7791f;
+  --color-pace-pending-tint: #fbf1de;
+  --color-pace-danger: #b3392a;
+  --color-pace-danger-tint: #fbeae6;
+  --color-pace-run: #dc6a42;
+  --color-pace-run-tint: #fbece4;
+  --color-pace-ride: #397dad;
+  --color-pace-ride-tint: #e6eff6;
+  --color-pace-swim: #277f86;
+  --color-pace-swim-tint: #e3f0f1;
+
+  --radius-control: 12px;
+  --radius-card: 16px;
+  --radius-panel: 24px;
+}
+
+/* Plain CSS variables too, for places that need raw values (SVG markers,
+   inline styles on map pins, etc.) outside Tailwind's utility generation. */
+:root {
+  --pace-ink: #1f2933;
+  --pace-muted: #62707c;
+  --pace-canvas: #f8f7f2;
+  --pace-surface: #ffffff;
+  --pace-line: #e4e6e1;
+  --pace-primary: #e85d3f;
+  --pace-primary-strong: #c8462d;
+  --pace-positive: #2d8a69;
+  --pace-positive-tint: #e6f3ed;
+  --pace-pending: #b7791f;
+  --pace-pending-tint: #fbf1de;
+  --pace-danger: #b3392a;
+  --pace-danger-tint: #fbeae6;
+  --pace-run: #dc6a42;
+  --pace-run-tint: #fbece4;
+  --pace-ride: #397dad;
+  --pace-ride-tint: #e6eff6;
+  --pace-swim: #277f86;
+  --pace-swim-tint: #e3f0f1;
+  --pace-space-1: 4px;
+  --pace-space-2: 8px;
+  --pace-space-3: 12px;
+  --pace-space-4: 16px;
+  --pace-space-6: 24px;
+  --pace-space-8: 32px;
+  --pace-space-12: 48px;
+  --pace-space-16: 64px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; background: var(--pace-canvas); }
+
+body {
+  margin: 0;
+  background: var(--pace-canvas);
+  color: var(--pace-ink);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { color: var(--pace-ink); font-weight: 700; margin: 0; }
+
+button, a { font: inherit; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+::selection { background: var(--pace-run-tint); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
