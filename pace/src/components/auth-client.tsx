@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
 import { getBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 export function UpdatePasswordForm() {
@@ -31,7 +30,7 @@ export function UpdatePasswordForm() {
     const supabase = getBrowserSupabaseClient();
     if (!supabase) {
       setIsError(false);
-      setFeedback("The Pace database is not configured yet.");
+      setFeedback("The Muster database is not configured yet.");
       return;
     }
 
@@ -48,33 +47,30 @@ export function UpdatePasswordForm() {
       return;
     }
 
-    router.push("/pace/sign-in?message=Password updated. You can sign in now.");
+    router.push("/muster/sign-in?message=Password updated. You can sign in now.");
   }
 
   return (
-    <form onSubmit={onSubmit}>
-      <h2>Choose a new password</h2>
-      {feedback && <p className={isError ? "form-error" : "form-success"}>{feedback}</p>}
-      <label>
-        New password
-        <input
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          placeholder="At least 8 characters"
-        />
-      </label>
-      <label>
-        Confirm password
-        <input
-          type="password"
-          value={confirmPassword}
-          onChange={(event) => setConfirmPassword(event.target.value)}
-          placeholder="Repeat the new password"
-        />
-      </label>
-      <button className="pace-primary" type="submit" disabled={isBusy}>
-        Save password <ArrowRight className="h-4 w-4" />
+    <form onSubmit={onSubmit} className="app-auth-form">
+      {feedback && <div className={isError ? "app-alert app-alert-error" : "app-alert app-alert-success"}>{feedback}</div>}
+      <input
+        className="app-auth-input"
+        type="password"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+        placeholder="New password (8+ characters)"
+        autoComplete="new-password"
+      />
+      <input
+        className="app-auth-input"
+        type="password"
+        value={confirmPassword}
+        onChange={(event) => setConfirmPassword(event.target.value)}
+        placeholder="Confirm new password"
+        autoComplete="new-password"
+      />
+      <button className="app-auth-submit" type="submit" disabled={isBusy}>
+        Save password
       </button>
     </form>
   );

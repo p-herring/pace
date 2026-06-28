@@ -1,8 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, MapPin, MoreHorizontal, Route, Users } from "lucide-react";
-import { paceJoinPlanAction } from "@/app/actions/pace";
-import { Avatar } from "@/components/avatar";
-import { SPORT, type Sport } from "@/lib/sport";
+import { type Sport } from "@/lib/sport";
 
 export interface PlanCardData {
   id: string;
@@ -18,66 +15,74 @@ export interface PlanCardData {
   host: { id: string; displayName: string; avatarUrl: string | null };
 }
 
-export function PlanCard({ plan }: { plan: PlanCardData }) {
-  const { Icon, label } = SPORT[plan.sport];
+function formatTime(iso: string) {
+  const d = new Date(iso);
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const isToday = d.toDateString() === now.toDateString();
+  const isTomorrow = d.toDateString() === tomorrow.toDateString();
+  const time = d.toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit", hour12: true });
+
+  if (isToday) return `Today · ${time}`;
+  if (isTomorrow) return `Tomorrow · ${time}`;
+  return d.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" }) + ` · ${time}`;
+}
+
+export function PlanCard({ plan, currentUserId }: { plan: PlanCardData; currentUserId?: string }) {
   const spotsLeft = Math.max(0, plan.capacity - plan.confirmedCount);
   const isFull = spotsLeft === 0;
+  const isHost = currentUserId === plan.host.id;
+
+  const initials = plan.host.displayName
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const joinLabel = isFull ? "Waitlist" : plan.requiresApproval ? "Request" : "Join";
 
   return (
-    <article className="plan-card">
-      <div className={`sport-rail ${plan.sport}`} />
-
-      <div className="plan-card-top">
-        <span className={`sport-label ${plan.sport}`}>
-          <Icon className="h-3.5 w-3.5" /> {label}
-        </span>
-        <details className="plan-card-menu">
-          <summary className="plan-card-menu-trigger" aria-label="More options">
-            <MoreHorizontal className="h-4 w-4" />
-          </summary>
-          <div className="plan-card-menu-panel">
-            <Link href={`/pace/report/${plan.id}`}>Report this plan</Link>
+    <article>
+      <Link href={`/muster/plan/${plan.id}`} className="plan-card-dark">
+        <div className={`plan-card-dark-hero ${plan.sport}`}>
+          <div className="plan-card-dark-sport">
+            <span className={`plan-card-dark-sport-dot ${plan.sport}`} />
+            {plan.sport.charAt(0).toUpperCase() + plan.sport.slice(1)}
           </div>
-        </details>
-      </div>
+          {plan.requiresApproval && (
+            <div className="plan-card-dark-approval">Approval required</div>
+          )}
+        </div>
 
-      <h3>
-        <Link href={`/pace/plan/${plan.id}`} className="plan-card-title-link">
-          {plan.title}
-        </Link>
-      </h3>
+        <div className="plan-card-dark-body">
+          <p className="plan-card-dark-time">
+            {formatTime(plan.startsAt)} · {plan.suburbLabel}
+          </p>
+          <h3 className="plan-card-dark-title">{plan.title}</h3>
 
-      <div className="plan-card-host">
-        <Avatar name={plan.host.displayName} avatarUrl={plan.host.avatarUrl} size={26} />
-        <Link href={`/pace/profile/${plan.host.id}`}>{plan.host.displayName}</Link>
-      </div>
+          <div className="plan-card-dark-footer">
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <div className="plan-card-dark-avatars">
+                <div className="plan-card-dark-av">
+                  {plan.host.avatarUrl
+                    ? <img src={plan.host.avatarUrl} alt={plan.host.displayName} />
+                    : initials}
+                </div>
+              </div>
+              <span className={`plan-card-dark-spots ${isFull ? "full" : spotsLeft <= 3 ? "open" : ""}`}>
+                {isFull ? "Full" : `${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`}
+              </span>
+            </div>
 
-      <div className="plan-card-stats">
-        <p>
-          <CalendarDays />
-          {new Date(plan.startsAt).toLocaleString("en-AU", { dateStyle: "medium", timeStyle: "short" })}
-        </p>
-        <p>
-          <MapPin /> {plan.suburbLabel}
-        </p>
-        <p>
-          <Route /> {plan.distanceKm} km
-        </p>
-        <p>
-          <Users /> {isFull ? "Full" : `${spotsLeft} spot${spotsLeft === 1 ? "" : "s"} left`}
-          {plan.requiresApproval ? " · approval required" : ""}
-        </p>
-      </div>
-
-      <div className="plan-card-footer">
-        <form action={paceJoinPlanAction}>
-          <input type="hidden" name="planId" value={plan.id} />
-          <input type="hidden" name="redirectTo" value="/pace" />
-          <button className="pace-primary" type="submit" disabled={isFull && !plan.requiresApproval}>
-            {plan.requiresApproval ? "Request to join" : isFull ? "Full" : "Join plan"}
-          </button>
-        </form>
-      </div>
+            {!isHost && (
+              <span className="plan-card-dark-join">{joinLabel}</span>
+            )}
+          </div>
+        </div>
+      </Link>
     </article>
   );
 }

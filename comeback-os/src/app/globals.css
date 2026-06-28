@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f2efe5;
+  --foreground: #171715;
+  --ink: #20201d;
+  --muted: #6e6a5f;
+  --panel: #fffdf6;
+  --paper: #eee7d8;
+  --line: #d8cfbd;
+  --signal: #238f55;
+  --signal-soft: #def2e4;
+  --blue: #416d96;
+  --gold: #ba8425;
+  --shadow: 0 20px 70px rgb(34 31 24 / 10%);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background:
+    linear-gradient(90deg, rgb(32 32 29 / 4%) 1px, transparent 1px),
+    linear-gradient(180deg, rgb(32 32 29 / 4%) 1px, transparent 1px),
+    var(--background);
+  background-size: 28px 28px;
+}
+
+body {
+  margin: 0;
+  background: transparent;
+  color: var(--foreground);
+  font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font: inherit;
+}

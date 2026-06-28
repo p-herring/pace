@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { paceCreatePlanAction, paceUpdatePlanAction } from "@/app/actions/pace";
+import { paceCreatePlanAction, paceUpdatePlanAction } from "@/app/actions/muster";
 import { LocationPicker, type LocationValue } from "@/components/location-picker";
 import { GpxUpload } from "@/components/gpx-upload";
 import { SPORT, SPORT_ORDER, type Sport } from "@/lib/sport";
@@ -41,7 +41,7 @@ export function NewPlanForm({ initial }: { initial?: PlanFormInitial }) {
 
   return (
     <form action={formAction}>
-      <p className="pace-kicker">{isEdit ? "Edit plan" : "Host a plan"}</p>
+      <p className="muster-kicker">{isEdit ? "Edit plan" : "Host a plan"}</p>
       <h1>{isEdit ? "Update the details." : "What are you up for?"}</h1>
       {state?.error && <p className="form-error">{state.error}</p>}
       {isEdit ? <input type="hidden" name="planId" value={initial!.planId} /> : null}
@@ -78,9 +78,9 @@ export function NewPlanForm({ initial }: { initial?: PlanFormInitial }) {
                 className="option-card"
                 aria-pressed={sport === value}
                 onClick={() => setSport(value)}
-                style={sport === value ? { borderColor: "var(--pace-primary)", background: "var(--pace-run-tint)" } : undefined}
+                style={sport === value ? { borderColor: "var(--muster-primary)", background: "var(--muster-run-tint)" } : undefined}
               >
-                <Icon className="h-4 w-4" style={{ marginTop: 2, color: `var(--pace-${value})` }} />
+                <Icon className="h-4 w-4" style={{ marginTop: 2, color: `var(--muster-${value})` }} />
                 <strong>{label}</strong>
               </button>
             );
@@ -257,7 +257,7 @@ export function NewPlanForm({ initial }: { initial?: PlanFormInitial }) {
         </fieldset>
       </div>
 
-      <button className="pace-primary" type="submit">
+      <button className="muster-primary" type="submit">
         {isEdit ? "Save changes" : "Post plan"}
       </button>
     </form>

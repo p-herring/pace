@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { paceUpdateProfileAction } from "@/app/actions/pace";
+import { paceUpdateProfileAction } from "@/app/actions/muster";
 import { AvatarUploader } from "@/components/avatar-uploader";
 import { LocationPicker, type LocationValue } from "@/components/location-picker";
 
@@ -28,10 +28,10 @@ export function AccountForm({
 
   return (
     <form action={formAction} className="account-card account-form">
-      <div className="account-form-heading"><p className="pace-kicker">Profile details</p><h2>Make your profile yours.</h2><p>These details help people recognise you and see plans that fit.</p></div>
+      <div className="account-form-heading"><p className="muster-kicker">Profile details</p><h2>Make your profile yours.</h2><p>These details help people recognise you and see plans that fit.</p></div>
       {state?.error && <p className="form-error">{state.error}</p>}
 
-      <AvatarUploader userId={userId} displayName={displayName || "Pace member"} avatarUrl={avatarUrl} />
+      <AvatarUploader userId={userId} displayName={displayName || "Muster member"} avatarUrl={avatarUrl} />
 
       <label>
         Display name
@@ -72,7 +72,7 @@ export function AccountForm({
         </label>
       </fieldset>
 
-      <button className="pace-primary" type="submit">
+      <button className="muster-primary" type="submit">
         Save changes
       </button>
     </form>

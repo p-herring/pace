@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { paceSaveOnboardingAction } from "@/app/actions/pace";
+import { paceSaveOnboardingAction } from "@/app/actions/muster";
 import { AvatarUploader } from "@/components/avatar-uploader";
 import { LocationPicker } from "@/components/location-picker";
 
@@ -19,10 +19,10 @@ export function OnboardingForm({
 
   return (
     <form action={formAction}>
-      <p className="pace-kicker">Profile setup</p>
+      <p className="muster-kicker">Profile setup</p>
       <h1>Set your starting line.</h1>
       {state?.error && <p className="form-error">{state.error}</p>}
-      <AvatarUploader userId={userId} displayName={displayName || "Pace member"} avatarUrl={avatarUrl} />
+      <AvatarUploader userId={userId} displayName={displayName || "Muster member"} avatarUrl={avatarUrl} />
       <label>
         Display name
         <input name="displayName" required maxLength={40} defaultValue={displayName} />
@@ -74,7 +74,7 @@ export function OnboardingForm({
         <span>
           I accept the{" "}
           <Link href="/policies" target="_blank" className="policy-link">
-            Pace beta policies
+            Muster beta policies
           </Link>{" "}
           and{" "}
           <Link href="/privacy" target="_blank" className="policy-link">
@@ -83,8 +83,8 @@ export function OnboardingForm({
           .
         </span>
       </label>
-      <button className="pace-primary" type="submit">
-        Enter Pace
+      <button className="muster-primary" type="submit">
+        Enter Muster
       </button>
     </form>
   );

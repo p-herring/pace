@@ -10,7 +10,7 @@ export interface RoutePoint {
 }
 
 const pointIcon = L.divIcon({
-  className: "pace-route-point",
+  className: "muster-route-point",
   html: "<span></span>",
   iconSize: [14, 14],
   iconAnchor: [7, 7],
@@ -53,7 +53,7 @@ export default function RouteMap({
       center={[center.lat, center.lng]}
       zoom={14}
       scrollWheelZoom={false}
-      className="pace-route-map"
+      className="muster-route-map"
       style={{ height: "260px", width: "100%" }}
     >
       <CtrlScrollZoom />

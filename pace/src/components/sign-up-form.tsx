@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera } from "lucide-react";
 import { FormEvent, useRef, useState } from "react";
-import { paceSignUpAction } from "@/app/actions/pace";
+import { paceSignUpAction } from "@/app/actions/muster";
 import { prepareAvatarFile, setFileInputFile, validateAvatarFile } from "@/lib/avatar-upload";
 
 export function SignUpForm({ error }: { error?: string }) {
@@ -16,110 +16,86 @@ export function SignUpForm({ error }: { error?: string }) {
   const isSubmittingRef = useRef(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    if (isSubmittingRef.current) {
-      return;
-    }
-
-    if (!selectedAvatar) {
-      return;
-    }
-
+    if (isSubmittingRef.current || !selectedAvatar) return;
     event.preventDefault();
     setIsPreparing(true);
     setAvatarError(null);
-
     try {
       const prepared = await prepareAvatarFile(selectedAvatar);
-      if (hiddenAvatarRef.current) {
-        setFileInputFile(hiddenAvatarRef.current, prepared.file);
-      }
+      if (hiddenAvatarRef.current) setFileInputFile(hiddenAvatarRef.current, prepared.file);
       isSubmittingRef.current = true;
       formRef.current?.requestSubmit();
-    } catch (prepareError) {
-      setAvatarError(prepareError instanceof Error ? prepareError.message : "We couldn’t prepare that photo.");
+    } catch (e) {
+      setAvatarError(e instanceof Error ? e.message : "Couldn't prepare that photo.");
       setIsPreparing(false);
     }
   }
 
   return (
-    <form ref={formRef} action={paceSignUpAction} onSubmit={handleSubmit}>
-      <h2>Join the beta</h2>
-      {error && <p className="form-error">{error}</p>}
-      <label>
-        First name or display name
-        <input name="displayName" required maxLength={40} />
-      </label>
-      <label>
-        Username
-        <input name="username" required minLength={3} maxLength={24} pattern="[a-zA-Z0-9_]+" autoCapitalize="none" autoComplete="username" />
-        <span className="field-hint">Letters, numbers and underscores only. This is how people can find you.</span>
-      </label>
-      <label>
-        Email
-        <input name="email" type="email" autoComplete="email" required />
-      </label>
-      <label>
-        Password
-        <input name="password" type="password" autoComplete="new-password" minLength={8} required />
-      </label>
+    <form ref={formRef} action={paceSignUpAction} onSubmit={handleSubmit} className="app-auth-form">
+      {error && <div className="app-alert app-alert-error">{error}</div>}
 
-      <section className="signup-avatar-step" aria-labelledby="signup-avatar-title">
-        <div className="signup-avatar-preview" aria-hidden="true">
-          {avatarPreviewUrl ? <img src={avatarPreviewUrl} alt="" /> : <Camera className="h-5 w-5" />}
+      <input className="app-auth-input" name="displayName" placeholder="First name or display name" required maxLength={40} />
+
+      <div>
+        <input className="app-auth-input" name="username" placeholder="Username" required minLength={3} maxLength={24} pattern="[a-zA-Z0-9_]+" autoCapitalize="none" autoComplete="username" />
+        <span style={{ fontSize: 12, color: "var(--app-muted)", marginTop: 6, display: "block" }}>Letters, numbers and underscores only.</span>
+      </div>
+
+      <input className="app-auth-input" name="email" type="email" placeholder="Email" autoComplete="email" required />
+      <input className="app-auth-input" name="password" type="password" placeholder="Password (8+ characters)" autoComplete="new-password" minLength={8} required />
+
+      {/* Avatar picker */}
+      <div style={{ display: "flex", alignItems: "center", gap: 14, background: "var(--app-card)", borderRadius: 14, padding: "14px 16px" }}>
+        <div style={{ width: 52, height: 52, borderRadius: "50%", overflow: "hidden", background: "var(--app-card-2)", display: "grid", placeItems: "center", flexShrink: 0, color: "var(--app-muted)" }}>
+          {avatarPreviewUrl
+            ? <img src={avatarPreviewUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            : <Camera size={20} />}
         </div>
-        <div>
-          <h3 id="signup-avatar-title">Add a profile picture <span>optional</span></h3>
-          <p>Skip it and Pace will use your initials until you add one later.</p>
-          {avatarError ? <p className="form-error">{avatarError}</p> : null}
-          <label className="pace-secondary signup-avatar-button">
-            {selectedAvatar ? "Choose a different photo" : "Choose photo"}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700, color: "var(--app-ink)" }}>
+            Profile photo <span style={{ color: "var(--app-muted)", fontWeight: 500 }}>optional</span>
+          </p>
+          {avatarError && <p style={{ margin: "0 0 6px", fontSize: 12, color: "#ff6b6b" }}>{avatarError}</p>}
+          <label style={{ display: "inline-block", cursor: "pointer", fontSize: 13, fontWeight: 700, color: "var(--app-accent)" }}>
+            {selectedAvatar ? "Change photo" : "Add photo"}
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
-              onChange={(event) => {
-                const file = event.currentTarget.files?.[0] ?? null;
+              style={{ position: "absolute", width: 1, height: 1, opacity: 0 }}
+              onChange={(e) => {
+                const file = e.currentTarget.files?.[0] ?? null;
                 if (!file) return;
-                const validationError = validateAvatarFile(file);
-                if (validationError) {
-                  setAvatarError(validationError);
-                  setSelectedAvatar(null);
-                  setAvatarPreviewUrl(null);
-                  return;
-                }
+                const err = validateAvatarFile(file);
+                if (err) { setAvatarError(err); setSelectedAvatar(null); setAvatarPreviewUrl(null); return; }
                 setAvatarError(null);
                 setSelectedAvatar(file);
                 setAvatarPreviewUrl(URL.createObjectURL(file));
               }}
             />
           </label>
-          <input ref={hiddenAvatarRef} type="file" name="avatar" hidden aria-hidden="true" tabIndex={-1} />
         </div>
-      </section>
+        <input ref={hiddenAvatarRef} type="file" name="avatar" hidden aria-hidden tabIndex={-1} />
+      </div>
 
-      <label className="check">
-        <input name="terms" type="checkbox" required />{" "}
+      {/* Terms */}
+      <label style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 14, color: "var(--app-muted)", fontWeight: 500, margin: 0, lineHeight: 1.5 }}>
+        <input name="terms" type="checkbox" required style={{ width: "auto", marginTop: 2, accentColor: "var(--app-accent)", flexShrink: 0 }} />
         <span>
-          I’m 18+ and agree to the Pace beta{" "}
-          <Link href="/policies" target="_blank" className="policy-link">
-            policies
-          </Link>{" "}
-          and{" "}
-          <Link href="/privacy" target="_blank" className="policy-link">
-            privacy policy
-          </Link>
-          .
+          I'm 18+ and agree to the Muster{" "}
+          <Link href="/policies" target="_blank" className="app-auth-link">policies</Link>
+          {" "}and{" "}
+          <Link href="/privacy" target="_blank" className="app-auth-link">privacy policy</Link>.
         </span>
       </label>
-      <button className="pace-primary" type="submit" aria-busy={isPreparing} disabled={isPreparing}>
-        {isPreparing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-        {isPreparing ? "Preparing photo…" : "Create account"}
+
+      <button className="app-auth-submit" type="submit" aria-busy={isPreparing} disabled={isPreparing}>
+        {isPreparing ? "Preparing…" : "Create account"}
       </button>
-      <p>
-        Already in?{" "}
-        <Link href="/pace/sign-in" className="auth-inline-link">
-          Sign in
-        </Link>
-      </p>
+
+      <div className="app-auth-footer">
+        Already have an account? <Link href="/muster/sign-in" className="app-auth-link">Sign in</Link>
+      </div>
     </form>
   );
 }

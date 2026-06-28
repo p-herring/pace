@@ -6,7 +6,7 @@ import L from "leaflet";
 import { CtrlScrollZoom } from "./ctrl-scroll-zoom";
 
 const pinIcon = L.divIcon({
-  className: "pace-pin-icon",
+  className: "muster-pin-icon",
   html: '<span></span>',
   iconSize: [22, 22],
   iconAnchor: [11, 22],
@@ -48,7 +48,7 @@ export default function PinMap({
       center={[latitude, longitude]}
       zoom={15}
       scrollWheelZoom={false}
-      className="pace-pin-map"
+      className="muster-pin-map"
       style={{ height: "220px", width: "100%" }}
     >
       <Recenter latitude={latitude} longitude={longitude} />

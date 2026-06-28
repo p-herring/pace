@@ -24,7 +24,7 @@ export function CheckEmailPanel({ email }: { email: string }) {
     const { error } = await supabase.auth.resend({
       type: "signup",
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/pace/onboarding` },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/muster/onboarding` },
     });
     if (error) {
       setState("error");
@@ -36,5 +36,32 @@ export function CheckEmailPanel({ email }: { email: string }) {
     setSeconds(RESEND_WAIT_SECONDS);
   }
 
-  return <section className="check-email-panel"><MailCheck className="check-email-icon" aria-hidden="true" /><h2>Verify your email</h2><p>We sent a secure confirmation link to <strong>{email || "your inbox"}</strong>. It can take a minute or two to arrive.</p><p className="check-email-tip">Check your spam or promotions folder before requesting another one.</p>{message && <p role="status" className={state === "error" ? "form-error" : "form-success"}>{message}</p>}<button type="button" className="resend-button" disabled={seconds > 0 || state === "sending" || !email} onClick={resend}><RotateCw className="h-4 w-4" />{state === "sending" ? "Sending…" : seconds > 0 ? `Resend available in ${seconds}s` : "Resend verification email"}</button></section>;
+  return (
+    <section style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%" }}>
+      <div style={{ width: 56, height: 56, borderRadius: 16, background: "var(--app-card)", display: "grid", placeItems: "center", color: "var(--app-accent)" }}>
+        <MailCheck size={28} aria-hidden="true" />
+      </div>
+      <p style={{ margin: 0, color: "var(--app-ink)", fontSize: 15 }}>
+        We sent a link to <strong>{email || "your inbox"}</strong>. It can take a minute or two to arrive.
+      </p>
+      <p style={{ margin: 0, color: "var(--app-muted)", fontSize: 14 }}>
+        Check your spam or promotions folder before requesting another one.
+      </p>
+      {message && (
+        <div className={state === "error" ? "app-alert app-alert-error" : "app-alert app-alert-success"} role="status">
+          {message}
+        </div>
+      )}
+      <button
+        type="button"
+        className="app-auth-submit"
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: (seconds > 0 || state === "sending" || !email) ? 0.5 : 1 }}
+        disabled={seconds > 0 || state === "sending" || !email}
+        onClick={resend}
+      >
+        <RotateCw size={16} />
+        {state === "sending" ? "Sending…" : seconds > 0 ? `Resend in ${seconds}s` : "Resend verification email"}
+      </button>
+    </section>
+  );
 }

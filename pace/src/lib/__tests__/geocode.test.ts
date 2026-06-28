@@ -53,7 +53,7 @@ describe("geocodeSearch", () => {
     vi.stubGlobal("fetch", fetchSpy);
     await geocodeSearch("Perth");
     const [, init] = fetchSpy.mock.calls[0];
-    expect(init.headers["User-Agent"]).toMatch(/Pace-Beta/);
+    expect(init.headers["User-Agent"]).toMatch(/Muster-Beta/);
   });
 
   it("respects the limit parameter", async () => {

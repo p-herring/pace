@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { routeDistanceKm } from "@/lib/pace-action-helpers";
+import { routeDistanceKm } from "@/lib/muster-action-helpers";
 import type { RoutePoint } from "./route-map";
 
 const RouteMap = dynamic(() => import("./route-map"), { ssr: false });

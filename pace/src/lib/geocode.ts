@@ -12,7 +12,7 @@ export interface GeocodeResult {
 }
 
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
-const USER_AGENT = "Pace-Beta/1.0 (+https://github.com/p-herring/pace)";
+const USER_AGENT = "Muster-Beta/1.0 (+https://github.com/p-herring/pace)";
 
 /** Returns up to `limit` matches for `query`, most-relevant first. */
 export async function geocodeSearch(query: string, limit = 5): Promise<GeocodeResult[]> {

@@ -2,7 +2,7 @@
 
 import { SendHorizontal } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
-import { paceSendPlanMessageAction } from "@/app/actions/pace";
+import { paceSendPlanMessageAction } from "@/app/actions/muster";
 import { Avatar } from "@/components/avatar";
 import { getBrowserSupabaseClient } from "@/lib/supabase/browser";
 
@@ -73,7 +73,7 @@ export function PlanChat({ planId, currentUserId, canChat, isReadOnly, initialMe
             body: data.body,
             created_at: data.created_at,
             sender: {
-              display_name: sender?.display_name ?? "Pace member",
+              display_name: sender?.display_name ?? "Muster member",
               avatar_url: sender?.avatar_url ?? null,
             },
           };
@@ -103,7 +103,7 @@ export function PlanChat({ planId, currentUserId, canChat, isReadOnly, initialMe
   if (!canChat) {
     return (
       <section className="plan-chat plan-chat-locked" aria-labelledby="plan-chat-title">
-        <p className="pace-kicker">Chat</p>
+        <p className="muster-kicker">Chat</p>
         <h2 id="plan-chat-title">Join the plan to access chat</h2>
         <p>Once you’re confirmed, you’ll be able to see the group chat and say hi.</p>
       </section>
@@ -114,7 +114,7 @@ export function PlanChat({ planId, currentUserId, canChat, isReadOnly, initialMe
     <section className="plan-chat" aria-labelledby="plan-chat-title">
       <div className="plan-chat-head">
         <div>
-          <p className="pace-kicker">Chat</p>
+          <p className="muster-kicker">Chat</p>
           <h2 id="plan-chat-title">Plan chat</h2>
         </div>
         {isReadOnly ? <span className="badge badge-neutral">Read-only</span> : null}
@@ -180,7 +180,7 @@ export function PlanChat({ planId, currentUserId, canChat, isReadOnly, initialMe
               }}
             />
           </label>
-          <button className="pace-primary" type="submit">
+          <button className="muster-primary" type="submit">
             <SendHorizontal className="h-4 w-4" />
             Send
           </button>

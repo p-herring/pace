@@ -16,7 +16,7 @@ export function Avatar({
 }) {
   return (
     <span
-      className="pace-avatar"
+      className="muster-avatar"
       style={{ width: size, height: size, fontSize: Math.max(10, size * 0.36) }}
       title={name}
     >
@@ -35,11 +35,11 @@ export function AvatarStack({
   const shown = people.slice(0, max);
   const remaining = people.length - shown.length;
   return (
-    <span className="pace-avatar-stack">
+    <span className="muster-avatar-stack">
       {shown.map((person, index) => (
         <Avatar key={`${person.name}-${index}`} name={person.name} avatarUrl={person.avatarUrl} />
       ))}
-      {remaining > 0 ? <span className="pace-avatar-more">+{remaining}</span> : null}
+      {remaining > 0 ? <span className="muster-avatar-more">+{remaining}</span> : null}
     </span>
   );
 }

@@ -9,9 +9,9 @@ const sportCopy: Record<string, string> = {
 
 export default function Home() {
   return (
-    <main className="pace-shell min-h-screen">
-      <header className="pace-header">
-        <a href="#top" className="pace-logo" aria-label="Pace home">
+    <main className="muster-shell min-h-screen">
+      <header className="muster-header">
+        <a href="#top" className="muster-logo" aria-label="Muster home">
           pace<span>.</span>
         </a>
         <nav className="hidden items-center gap-7 text-sm font-semibold text-pace-muted md:flex">
@@ -19,24 +19,24 @@ export default function Home() {
           <a href="#how" className="hover:text-pace-ink">How it works</a>
         </nav>
         <div className="flex items-center gap-3">
-          <a href="/pace/sign-in" className="pace-text hidden sm:inline">Sign in</a>
-          <a href="/pace/sign-up" className="pace-primary">Join the beta</a>
+          <a href="/muster/sign-in" className="muster-text hidden sm:inline">Sign in</a>
+          <a href="/muster/sign-up" className="muster-primary">Join the beta</a>
         </div>
       </header>
 
-      <section id="top" className="pace-hero">
+      <section id="top" className="muster-hero">
         <div className="max-w-2xl">
-          <p className="pace-kicker">
+          <p className="muster-kicker">
             <Sparkles className="h-4 w-4" /> Now in beta
           </p>
           <h1>Find your people to move with.</h1>
           <p className="mt-5 max-w-xl text-lg leading-8 text-pace-muted">
-            Pace turns &ldquo;I want to do something&rdquo; into &ldquo;we&rsquo;re going.&rdquo; Post a run, ride or
+            Muster turns &ldquo;I want to do something&rdquo; into &ldquo;we&rsquo;re going.&rdquo; Post a run, ride or
             swim, set the time and place, and meet people who move at your pace.
           </p>
-          <div className="pace-hero-actions">
-            <a href="/pace/sign-up" className="pace-primary">Join the beta</a>
-            <a href="#how" className="pace-secondary">See how it works</a>
+          <div className="muster-hero-actions">
+            <a href="/muster/sign-up" className="muster-primary">Join the beta</a>
+            <a href="#how" className="muster-secondary">See how it works</a>
           </div>
           <p className="mt-6 flex items-center gap-2 text-sm font-semibold text-pace-muted">
             <MapPin className="h-4 w-4 text-pace-primary" /> Starting in Perth, WA
@@ -60,7 +60,7 @@ export default function Home() {
       </section>
 
       <section id="how" className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
-        <p className="pace-kicker">Simple by design</p>
+        <p className="muster-kicker">Simple by design</p>
         <div className="mt-4 grid gap-8 md:grid-cols-3">
           <Step n="01" title="Share your plan" text="Set the sport, place, time, pace and distance. No awkward ambiguity." />
           <Step n="02" title="Find a fit" text="See plans from people moving on your schedule, at your effort." />
@@ -70,8 +70,8 @@ export default function Home() {
 
       <section className="cta-band">
         <h2>Ready to find your next run, ride or swim?</h2>
-        <p>Pace is in beta around Perth. Join now and help shape it as it grows.</p>
-        <a href="/pace/sign-up" className="pace-primary">Join the beta</a>
+        <p>Muster is in beta around Perth. Join now and help shape it as it grows.</p>
+        <a href="/muster/sign-up" className="muster-primary">Join the beta</a>
       </section>
     </main>
   );

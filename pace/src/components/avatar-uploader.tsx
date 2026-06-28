@@ -38,7 +38,7 @@ export function AvatarUploader({ userId, displayName, avatarUrl }: AvatarUploade
 
     const supabase = getBrowserSupabaseClient();
     if (!supabase) {
-      setError("Avatar uploads will work once the Pace database is configured.");
+      setError("Avatar uploads will work once the Muster database is configured.");
       return;
     }
 
@@ -91,13 +91,13 @@ export function AvatarUploader({ userId, displayName, avatarUrl }: AvatarUploade
   return (
     <section className="avatar-upload" aria-labelledby={`${inputId}-title`}>
       <div className="avatar-upload-preview">
-        <Avatar name={displayName || "Pace member"} avatarUrl={previewUrl ?? currentUrl} size={72} />
+        <Avatar name={displayName || "Muster member"} avatarUrl={previewUrl ?? currentUrl} size={72} />
       </div>
       <div className="avatar-upload-copy">
         <h2 id={`${inputId}-title`}>Profile picture</h2>
         <p>Upload a clear face or friendly marker. We’ll resize it before saving.</p>
         {error ? <p className="form-error">{error}</p> : null}
-        <label className="pace-secondary avatar-upload-button" htmlFor={inputId} aria-busy={isUploading}>
+        <label className="muster-secondary avatar-upload-button" htmlFor={inputId} aria-busy={isUploading}>
           {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
           {currentUrl || previewUrl ? "Replace photo" : "Add photo"}
           <input

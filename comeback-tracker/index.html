@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Comeback Tracker</title>
+    <meta
+      name="description"
+      content="A public, live training comeback tracker showing weekly bodyweight, lifts, run pace, and progress notes."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Personal comeback log</p>
+          <h1>Proof of work, before the pitch.</h1>
+          <p class="lede">
+            A public training dashboard for the rebuild: weight, key lifts, run pace, and the weekly checkpoint.
+          </p>
+        </div>
+
+        <aside class="tracker" aria-labelledby="tracker-title">
+          <div class="tracker-head">
+            <div>
+              <p class="status-pill">Live snapshot</p>
+              <h2 id="tracker-title">Week <span data-field="weekNumber">--</span></h2>
+            </div>
+            <div class="pulse" aria-label="Live"></div>
+          </div>
+
+          <div class="metric-grid">
+            <article class="metric-card">
+              <p>Bodyweight</p>
+              <strong data-field="bodyweight">--</strong>
+              <span data-field="bodyweightChange">--</span>
+            </article>
+            <article class="metric-card">
+              <p data-field="runLabel">Run pace</p>
+              <strong data-field="runPace">--</strong>
+              <span>current working pace</span>
+            </article>
+          </div>
+
+          <div class="lift-strip" data-lifts></div>
+
+          <div class="session-note">
+            <div>
+              <span class="label">Sessions logged</span>
+              <strong data-field="sessionsCompleted">--</strong>
+            </div>
+            <time data-field="recordedOn">--</time>
+          </div>
+
+          <blockquote data-field="note">Loading latest checkpoint.</blockquote>
+
+          <div class="next-checkpoint">
+            <span>Next proof</span>
+            <p data-field="nextCheckpoint">--</p>
+          </div>
+
+          <footer class="source-line">
+            <span>Source: <span data-field="sourceLabel">--</span></span>
+            <a data-field="sourceUrl" href="#" hidden>View source</a>
+          </footer>
+        </aside>
+      </section>
+
+      <section class="timeline" aria-label="Comeback history">
+        <div class="section-header">
+          <p class="eyebrow">Recent weeks</p>
+          <h2>Visible consistency beats announcement energy.</h2>
+        </div>
+        <div class="history-grid" data-history></div>
+      </section>
+    </main>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

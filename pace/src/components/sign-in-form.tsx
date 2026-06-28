@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { paceSignInAction } from "@/app/actions/pace";
+import { paceSignInAction } from "@/app/actions/muster";
 
-const rememberedEmailKey = "pace.remembered-email";
+const rememberedEmailKey = "muster.remembered-email";
 
 export function SignInForm({ error, next }: { error?: string; next?: string }) {
   const [identifier, setIdentifier] = useState("");
@@ -13,11 +12,8 @@ export function SignInForm({ error, next }: { error?: string; next?: string }) {
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
-      const savedEmail = window.localStorage.getItem(rememberedEmailKey);
-      if (savedEmail) {
-        setIdentifier(savedEmail);
-        setRememberEmail(true);
-      }
+      const saved = window.localStorage.getItem(rememberedEmailKey);
+      if (saved) { setIdentifier(saved); setRememberEmail(true); }
     });
     return () => window.cancelAnimationFrame(frame);
   }, []);
@@ -31,44 +27,54 @@ export function SignInForm({ error, next }: { error?: string; next?: string }) {
   }
 
   return (
-    <form action={paceSignInAction} onSubmit={remember}>
-      <h2>Sign in</h2>
-      <input type="hidden" name="next" value={next ?? "/pace"} />
-      {error && <p className="form-error">{error}</p>}
-      <label>
-        Email or username
+    <form action={paceSignInAction} onSubmit={remember} className="app-auth-form">
+      <input type="hidden" name="next" value={next ?? "/muster"} />
+
+      {error && <div className="app-alert app-alert-error">{error}</div>}
+
+      <div>
         <input
+          className="app-auth-input"
           name="identifier"
           type="text"
+          placeholder="Email or username"
           autoComplete="username"
           value={identifier}
-          onChange={(event) => setIdentifier(event.target.value)}
+          onChange={(e) => setIdentifier(e.target.value)}
           required
         />
-      </label>
-      <label>
-        Password
-        <input name="password" type="password" autoComplete="current-password" required />
-      </label>
-      <label className="check remember-email">
+      </div>
+
+      <div>
+        <input
+          className="app-auth-input"
+          name="password"
+          type="password"
+          placeholder="Password"
+          autoComplete="current-password"
+          required
+        />
+      </div>
+
+      <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--app-muted)", fontWeight: 600, margin: 0 }}>
         <input
           type="checkbox"
           checked={rememberEmail}
-          onChange={(event) => setRememberEmail(event.target.checked)}
+          onChange={(e) => setRememberEmail(e.target.checked)}
+          style={{ width: "auto", accentColor: "var(--app-accent)" }}
         />
         Remember my email on this device
       </label>
-      <button className="pace-primary" type="submit">
-        Sign in <ArrowRight className="h-4 w-4" />
+
+      <button className="app-auth-submit" type="submit">
+        Sign in
       </button>
-      <p className="auth-secondary-action">
-        <Link href="/pace/forgot-password" className="policy-link auth-inline-link">
-          Forgot password?
-        </Link>
-      </p>
-      <p>
-        New here? <Link href="/pace/sign-up" className="auth-inline-link">Join the beta</Link>
-      </p>
+
+      <div className="app-auth-footer">
+        <Link href="/muster/forgot-password" className="app-auth-link">Forgot password?</Link>
+        {" · "}
+        <Link href="/muster/sign-up" className="app-auth-link">Join the beta</Link>
+      </div>
     </form>
   );
 }

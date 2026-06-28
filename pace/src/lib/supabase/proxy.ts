@@ -2,13 +2,13 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { env, hasSupabaseAuth } from "@/lib/env";
 
-// /pace/* is a flat namespace, so these are exact paths rather than prefixes —
-// "/pace" must not also match "/pace/sign-up".
-const PROTECTED_PACE_PATHS = ["/pace", "/pace/new", "/pace/onboarding", "/pace/account", "/pace/account/delete"];
+// /muster/* is a flat namespace, so these are exact paths rather than prefixes —
+// "/muster" must not also match "/muster/sign-up".
+const PROTECTED_PACE_PATHS = ["/muster", "/muster/new", "/muster/onboarding", "/muster/account", "/muster/account/delete"];
 // Dynamic routes get their own prefix list, checked separately so a prefix like
-// "/pace/report/" can't accidentally swallow an unrelated top-level "/pace/..." path.
-const PROTECTED_PACE_PREFIXES = ["/pace/report/", "/pace/plan/"];
-const GUEST_ONLY_PACE_PATHS = ["/pace/sign-up", "/pace/sign-in"];
+// "/muster/report/" can't accidentally swallow an unrelated top-level "/muster/..." path.
+const PROTECTED_PACE_PREFIXES = ["/muster/report/", "/muster/plan/"];
+const GUEST_ONLY_PACE_PATHS = ["/muster/sign-up", "/muster/sign-in"];
 
 export async function updateSession(request: NextRequest) {
   if (!hasSupabaseAuth) {
@@ -47,7 +47,7 @@ export async function updateSession(request: NextRequest) {
     !user
   ) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/pace/sign-in";
+    redirectUrl.pathname = "/muster/sign-in";
     redirectUrl.search = "";
     redirectUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(redirectUrl);
@@ -55,7 +55,7 @@ export async function updateSession(request: NextRequest) {
 
   if (GUEST_ONLY_PACE_PATHS.includes(pathname) && user) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/pace";
+    redirectUrl.pathname = "/muster";
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }

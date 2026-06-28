@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { paceInvitePersonAction, paceSearchProfilesAction } from "@/app/actions/pace";
+import { paceInvitePersonAction, paceSearchProfilesAction } from "@/app/actions/muster";
 
 export function InvitePeople({ planId }: { planId: string }) {
   const [query, setQuery] = useState("");
@@ -46,7 +46,7 @@ export function InvitePeople({ planId }: { planId: string }) {
 
   return (
     <div className="invite-people">
-      <p className="pace-kicker">Invite people</p>
+      <p className="muster-kicker">Invite people</p>
       <input
         type="text"
         value={query}

@@ -2,7 +2,7 @@
 
 import { Camera, Loader2, X } from "lucide-react";
 import { FormEvent, useRef, useState } from "react";
-import { paceCreateActivityPostAction } from "@/app/actions/pace";
+import { paceCreateActivityPostAction } from "@/app/actions/muster";
 import { MAX_PHOTOS, prepareActivityPhoto, validateActivityPhoto } from "@/lib/activity-photo-upload";
 import { setFileInputFiles } from "@/lib/avatar-upload";
 
@@ -63,7 +63,7 @@ export function ActivityPostForm({ pastPlans }: { pastPlans: PastPlan[] }) {
   return (
     <form ref={formRef} action={paceCreateActivityPostAction} onSubmit={handleSubmit} className="activity-composer">
       <div>
-        <p className="pace-kicker">Activity</p>
+        <p className="muster-kicker">Activity</p>
         <h2>Share a moment</h2>
         <p>Add photos, a caption, or link it to a past plan.</p>
       </div>
@@ -107,7 +107,7 @@ export function ActivityPostForm({ pastPlans }: { pastPlans: PastPlan[] }) {
       ) : null}
 
       <div className="activity-composer-actions">
-        <label className="pace-secondary activity-photo-button">
+        <label className="muster-secondary activity-photo-button">
           <Camera className="h-4 w-4" />
           {photos.length ? "Add more photos" : "Add photos"}
           <input
@@ -121,7 +121,7 @@ export function ActivityPostForm({ pastPlans }: { pastPlans: PastPlan[] }) {
           />
         </label>
         <input ref={hiddenPhotosRef} type="file" name="photos" multiple hidden aria-hidden="true" tabIndex={-1} />
-        <button className="pace-primary" type="submit" aria-busy={isPreparing} disabled={isPreparing}>
+        <button className="muster-primary" type="submit" aria-busy={isPreparing} disabled={isPreparing}>
           {isPreparing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           Post
         </button>

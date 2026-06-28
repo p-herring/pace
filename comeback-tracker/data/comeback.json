@@ -1,0 +1,49 @@
+{
+  "snapshot": {
+    "weekNumber": 7,
+    "recordedOn": "2026-06-10",
+    "bodyweight": "91.8 kg",
+    "bodyweightChange": "-3.4 kg from start",
+    "runLabel": "Zone 2 run",
+    "runPace": "5:42 /km",
+    "sessionsCompleted": 26,
+    "sourceLabel": "Manual session log",
+    "sourceUrl": "",
+    "note": "Back-to-back training weeks completed without missing a key session.",
+    "nextCheckpoint": "Retest 5 km pace after Saturday strength.",
+    "lifts": [
+      {
+        "label": "Squat",
+        "value": "125 kg",
+        "change": "+10 kg"
+      },
+      {
+        "label": "Bench",
+        "value": "87.5 kg",
+        "change": "+2.5 kg"
+      },
+      {
+        "label": "Deadlift",
+        "value": "155 kg",
+        "change": "+15 kg"
+      }
+    ]
+  },
+  "history": [
+    {
+      "weekNumber": 7,
+      "headline": "26 sessions",
+      "note": "The first stretch that feels repeatable rather than heroic."
+    },
+    {
+      "weekNumber": 6,
+      "headline": "5:48 /km",
+      "note": "Aerobic pace moved without forcing intensity."
+    },
+    {
+      "weekNumber": 5,
+      "headline": "150 kg deadlift",
+      "note": "Strength came back while keeping the run week intact."
+    }
+  ]
+}

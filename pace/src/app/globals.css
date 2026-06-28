@@ -38,54 +38,70 @@
 /* Plain CSS variables too, for places that need raw values (SVG markers,
    inline styles on map pins, etc.) outside Tailwind's utility generation. */
 :root {
-  --pace-ink: #1f2933;
-  --pace-muted: #62707c;
-  --pace-canvas: #f8f7f2;
-  --pace-surface: #ffffff;
-  --pace-line: #e4e6e1;
-  --pace-primary: #e85d3f;
-  --pace-primary-strong: #c8462d;
-  --pace-positive: #2d8a69;
-  --pace-positive-tint: #e6f3ed;
-  --pace-pending: #b7791f;
-  --pace-pending-tint: #fbf1de;
-  --pace-danger: #b3392a;
-  --pace-danger-tint: #fbeae6;
-  --pace-run: #dc6a42;
-  --pace-run-tint: #fbece4;
-  --pace-ride: #397dad;
-  --pace-ride-tint: #e6eff6;
-  --pace-swim: #277f86;
-  --pace-swim-tint: #e3f0f1;
-  --pace-space-1: 4px;
-  --pace-space-2: 8px;
-  --pace-space-3: 12px;
-  --pace-space-4: 16px;
-  --pace-space-6: 24px;
-  --pace-space-8: 32px;
-  --pace-space-12: 48px;
-  --pace-space-16: 64px;
+  /* Light (marketing / auth) */
+  --muster-ink: #1f2933;
+  --muster-muted: #62707c;
+  --muster-canvas: #f8f7f2;
+  --muster-surface: #ffffff;
+  --muster-line: #e4e6e1;
+  --muster-primary: #e85d3f;
+  --muster-primary-strong: #c8462d;
+
+  /* Dark app shell — used by .app-dark wrapper */
+  --app-bg: #1c1c1e;
+  --app-card: #2c2c2e;
+  --app-card-2: #3a3a3c;
+  --app-ink: #ffffff;
+  --app-muted: rgba(255,255,255,0.5);
+  --app-line: rgba(255,255,255,0.1);
+  --app-accent: #e85d3f;
+  --app-accent-strong: #c8462d;
+  --app-run: #dc6a42;
+  --app-ride: #4a9fd4;
+  --app-swim: #3ab8c8;
+  --app-positive: #30d158;
+  --app-nav-h: 64px;
+  --muster-positive: #2d8a69;
+  --muster-positive-tint: #e6f3ed;
+  --muster-pending: #b7791f;
+  --muster-pending-tint: #fbf1de;
+  --muster-danger: #b3392a;
+  --muster-danger-tint: #fbeae6;
+  --muster-run: #dc6a42;
+  --muster-run-tint: #fbece4;
+  --muster-ride: #397dad;
+  --muster-ride-tint: #e6eff6;
+  --muster-swim: #277f86;
+  --muster-swim-tint: #e3f0f1;
+  --muster-space-1: 4px;
+  --muster-space-2: 8px;
+  --muster-space-3: 12px;
+  --muster-space-4: 16px;
+  --muster-space-6: 24px;
+  --muster-space-8: 32px;
+  --muster-space-12: 48px;
+  --muster-space-16: 64px;
 }
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; background: var(--pace-canvas); }
+html { scroll-behavior: smooth; background: var(--muster-canvas); }
 
 body {
   margin: 0;
-  background: var(--pace-canvas);
-  color: var(--pace-ink);
+  background: var(--muster-canvas);
+  color: var(--muster-ink);
   font-family: var(--font-sans);
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4 { color: var(--pace-ink); font-weight: 700; margin: 0; }
+h1, h2, h3, h4 { color: var(--muster-ink); font-weight: 700; margin: 0; }
 
 button, a { font: inherit; cursor: pointer; }
 a { color: inherit; text-decoration: none; }
 
-::selection { background: var(--pace-run-tint); }
+::selection { background: var(--muster-run-tint); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

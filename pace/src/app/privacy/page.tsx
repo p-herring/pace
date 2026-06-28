@@ -38,7 +38,7 @@ const sections: Array<[string, string[]]> = [
     "Your choices",
     [
       "You can edit your profile, leave any plan, and block or report another member at any time.",
-      "You can delete your account from Account settings — this permanently removes your profile, plans, messages and notifications. See /pace/account.",
+      "You can delete your account from Account settings — this permanently removes your profile, plans, messages and notifications. See /muster/account.",
     ],
   ],
 ];
@@ -46,13 +46,13 @@ const sections: Array<[string, string[]]> = [
 export default function PrivacyPolicy() {
   return (
     <main className="policy-page">
-      <Link href="/" className="pace-logo">
+      <Link href="/" className="muster-logo">
         pace<span>.</span>
       </Link>
-      <p className="pace-kicker">Pace beta</p>
+      <p className="muster-kicker">Muster beta</p>
       <h1>Privacy policy</h1>
       <p className="policy-lead">
-        This page describes, in plain language, what Pace collects and how it’s used. It
+        This page describes, in plain language, what Muster collects and how it’s used. It
         is a working draft for the closed beta and has not yet had a formal legal review —
         treat it as an accurate description of current behaviour, not as a finished legal
         document.

@@ -8,19 +8,19 @@ function safeRedirect(path: string | null, origin: string) {
     return new URL(path, origin);
   }
 
-  return new URL("/pace", origin);
+  return new URL("/muster", origin);
 }
 
 export async function GET(request: NextRequest) {
   if (!hasSupabaseAuth) {
-    return NextResponse.redirect(new URL("/pace/sign-in", request.url));
+    return NextResponse.redirect(new URL("/muster/sign-in", request.url));
   }
 
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const type = requestUrl.searchParams.get("type");
   const nextPath = requestUrl.searchParams.get("next");
-  const redirectTarget = type === "recovery" ? "/pace/update-password" : nextPath;
+  const redirectTarget = type === "recovery" ? "/muster/update-password" : nextPath;
 
   let response = NextResponse.redirect(safeRedirect(redirectTarget, request.url));
   const cookieStore = await cookies();
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       response = NextResponse.redirect(
-        new URL(`/pace/sign-in?error=${encodeURIComponent(error.message)}`, request.url),
+        new URL(`/muster/sign-in?error=${encodeURIComponent(error.message)}`, request.url),
       );
     }
     // email_verified_at on pace_profile_private is kept in sync automatically by a
