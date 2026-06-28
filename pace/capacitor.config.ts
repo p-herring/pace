@@ -46,9 +46,6 @@ const config: CapacitorConfig = {
   },
 
   ios: {
-    // Minimum iOS version (17 covers ~95 % of active devices as of 2025).
-    minVersion: '16.0',
-
     // Lets Supabase Auth deep links (muster://auth/callback) work.
     // Register this scheme in App Store Connect → App Information too.
     scheme: 'muster',
