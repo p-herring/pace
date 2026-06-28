@@ -15,7 +15,7 @@ export interface PlanCardData {
   confirmedCount: number;
   visibility: string;
   requiresApproval: boolean;
-  host: { displayName: string; avatarUrl: string | null };
+  host: { id: string; displayName: string; avatarUrl: string | null };
 }
 
 export function PlanCard({ plan }: { plan: PlanCardData }) {
@@ -49,7 +49,7 @@ export function PlanCard({ plan }: { plan: PlanCardData }) {
 
       <div className="plan-card-host">
         <Avatar name={plan.host.displayName} avatarUrl={plan.host.avatarUrl} size={26} />
-        <span>{plan.host.displayName}</span>
+        <Link href={`/pace/profile/${plan.host.id}`}>{plan.host.displayName}</Link>
       </div>
 
       <div className="plan-card-stats">

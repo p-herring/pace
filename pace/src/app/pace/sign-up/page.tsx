@@ -1,8 +1,17 @@
-import Link from "next/link";
-import { paceSignUpAction } from "@/app/actions/pace";
 import { PaceAuthBrand } from "@/components/pace-auth-brand";
+import { SignUpForm } from "@/components/sign-up-form";
 
 export default async function PaceSignUp({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
-  return <main className="pace-auth"><PaceAuthBrand /><section><p className="pace-kicker">Pace beta · Perth</p><h1>Meet good people. Move together.</h1><p>Invite-only beta for running, cycling and swimming in public places.</p></section><form action={paceSignUpAction}><h2>Join the beta</h2>{error && <p className="form-error">{error}</p>}<label>First name or display name<input name="displayName" required maxLength={40} /></label><label>Username<input name="username" required minLength={3} maxLength={24} pattern="[a-zA-Z0-9_]+" autoCapitalize="none" autoComplete="username" /><span className="field-hint">Letters, numbers and underscores only. This is how people can find you.</span></label><label>Email<input name="email" type="email" autoComplete="email" required /></label><label>Password<input name="password" type="password" autoComplete="new-password" minLength={8} required /></label><label className="check"><input name="terms" type="checkbox" required /> <span>I’m 18+ and agree to the Pace beta <Link href="/policies" target="_blank" className="policy-link">policies</Link> and <Link href="/privacy" target="_blank" className="policy-link">privacy policy</Link>.</span></label><button className="pace-primary" type="submit">Create account</button><p>Already in? <Link href="/pace/sign-in" className="auth-inline-link">Sign in</Link></p></form></main>;
+  return (
+    <main className="pace-auth">
+      <PaceAuthBrand />
+      <section>
+        <p className="pace-kicker">Pace beta · Perth</p>
+        <h1>Meet good people. Move together.</h1>
+        <p>Invite-only beta for running, cycling and swimming in public places.</p>
+      </section>
+      <SignUpForm error={error} />
+    </main>
+  );
 }

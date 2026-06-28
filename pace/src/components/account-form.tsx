@@ -2,18 +2,23 @@
 
 import { useActionState } from "react";
 import { paceUpdateProfileAction } from "@/app/actions/pace";
+import { AvatarUploader } from "@/components/avatar-uploader";
 import { LocationPicker, type LocationValue } from "@/components/location-picker";
 
 const sportLabels: Record<string, string> = { run: "Run", ride: "Ride", swim: "Swim" };
 
 export function AccountForm({
+  userId,
   displayName,
+  avatarUrl,
   bio,
   mySports,
   isPrivate,
   initialLocation,
 }: {
+  userId: string;
   displayName: string;
+  avatarUrl?: string | null;
   bio: string;
   mySports: Set<string>;
   isPrivate: boolean;
@@ -25,6 +30,8 @@ export function AccountForm({
     <form action={formAction} className="account-card account-form">
       <div className="account-form-heading"><p className="pace-kicker">Profile details</p><h2>Make your profile yours.</h2><p>These details help people recognise you and see plans that fit.</p></div>
       {state?.error && <p className="form-error">{state.error}</p>}
+
+      <AvatarUploader userId={userId} displayName={displayName || "Pace member"} avatarUrl={avatarUrl} />
 
       <label>
         Display name

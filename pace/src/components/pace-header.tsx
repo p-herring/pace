@@ -8,6 +8,8 @@ import { paceSignOutAction } from "@/app/actions/pace";
 export function PaceHeader() {
   const pathname = usePathname();
   const onPlans = pathname === "/pace";
+  const onForum = pathname?.startsWith("/pace/forum");
+  const onProfile = pathname?.startsWith("/pace/profile");
   const onAccount = pathname?.startsWith("/pace/account");
 
   return (
@@ -18,6 +20,12 @@ export function PaceHeader() {
       <nav aria-label="Pace navigation" className="pace-inner-nav">
         <Link href="/pace" aria-current={onPlans ? "page" : undefined}>
           Plans
+        </Link>
+        <Link href="/pace/forum" aria-current={onForum ? "page" : undefined}>
+          Forum
+        </Link>
+        <Link href="/pace/profile" aria-current={onProfile ? "page" : undefined}>
+          Profile
         </Link>
         <Link href="/pace/account" aria-current={onAccount ? "page" : undefined}>
           Account

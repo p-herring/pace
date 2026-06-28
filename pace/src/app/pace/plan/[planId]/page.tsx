@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CalendarDays, Lock, MapPin, Route as RouteIcon, ShieldAlert, Users } from "lucide-react";
-import { paceJoinPlanAction, paceLeavePlanAction } from "@/app/actions/pace";
+import { paceJoinPlanAction, paceLeavePlanAction, paceMarkPlanCompletedAction } from "@/app/actions/pace";
 import { Avatar, AvatarStack } from "@/components/avatar";
 import { InvitePeople } from "@/components/invite-people";
 import { PaceHeader } from "@/components/pace-header";
+import { PlanChat, type PlanChatMessage } from "@/components/plan-chat";
 import { RouteDisplay } from "@/components/route-display";
 import { formatPaceValue, isPlanEditable } from "@/lib/pace-action-helpers";
 import { SPORT, type Sport } from "@/lib/sport";
@@ -12,6 +13,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const statusCopy: Record<string, string> = {
   confirmed: "You’re confirmed",
+  attended: "You completed this plan",
   waitlisted: "You’re on the waitlist",
   requested: "Your request is pending approval",
 };
@@ -51,7 +53,7 @@ export default async function PlanDetail({
       .from("pace_plan_participants")
       .select("profile:pace_profiles!inner(display_name,avatar_url)")
       .eq("plan_id", planId)
-      .eq("status", "confirmed"),
+      .in("status", ["confirmed", "attended"]),
     supabase.from("pace_plan_private_locations").select("location_name,latitude,longitude,route_path,route_distance_km").eq("plan_id", planId).maybeSingle(),
   ]);
 
@@ -60,13 +62,41 @@ export default async function PlanDetail({
   const paceValue = plan.run_pace_seconds ?? plan.ride_speed_kmh ?? plan.swim_pace_seconds;
   const editable = isPlanEditable(plan.starts_at);
   const joined = myParticipation?.status === "confirmed";
+  const attended = myParticipation?.status === "attended";
   const pending = myParticipation && ["waitlisted", "requested"].includes(myParticipation.status);
   const invited = myParticipation?.status === "invited";
   const host = Array.isArray(plan.host) ? plan.host[0] : plan.host;
+  const planHasStarted = new Date(plan.starts_at).getTime() <= new Date().getTime();
+  const canChat = isHost || joined || attended;
+  const chatReadOnly = plan.status === "cancelled";
 
   const confirmed = (confirmedParticipants ?? []).map((row) => {
     const profile = Array.isArray(row.profile) ? row.profile[0] : row.profile;
     return { name: profile?.display_name ?? "Pace member", avatarUrl: profile?.avatar_url ?? null };
+  });
+
+  const { data: rawMessages } = canChat
+    ? await supabase
+        .from("pace_plan_messages")
+        .select("id,plan_id,sender_id,body,created_at,sender:pace_profiles!pace_plan_messages_sender_id_fkey(display_name,avatar_url)")
+        .eq("plan_id", planId)
+        .order("created_at", { ascending: true })
+        .limit(50)
+    : { data: [] };
+
+  const messages: PlanChatMessage[] = (rawMessages ?? []).map((message) => {
+    const sender = Array.isArray(message.sender) ? message.sender[0] : message.sender;
+    return {
+      id: message.id,
+      plan_id: message.plan_id,
+      sender_id: message.sender_id,
+      body: message.body,
+      created_at: message.created_at,
+      sender: {
+        display_name: sender?.display_name ?? "Pace member",
+        avatar_url: sender?.avatar_url ?? null,
+      },
+    };
   });
 
   return (
@@ -85,7 +115,12 @@ export default async function PlanDetail({
             <div className="plan-detail-host-row">
               <Avatar name={host?.display_name ?? "Pace member"} avatarUrl={host?.avatar_url} size={36} />
               <div>
-                <span>Hosted by {host?.display_name ?? "a Pace member"}</span>
+                <span>
+                  Hosted by{" "}
+                  <Link href={`/pace/profile/${plan.host_id}`} className="pace-text">
+                    {host?.display_name ?? "a Pace member"}
+                  </Link>
+                </span>
                 {isHost ? <small>That’s you</small> : null}
               </div>
             </div>
@@ -145,6 +180,14 @@ export default async function PlanDetail({
               <RouteDisplay path={privateLocation.route_path as { lat: number; lng: number }[]} />
             ) : null}
 
+            <PlanChat
+              planId={plan.id}
+              currentUserId={user.id}
+              canChat={canChat}
+              isReadOnly={chatReadOnly}
+              initialMessages={messages}
+            />
+
             {isHost && plan.visibility === "private" ? <InvitePeople planId={plan.id} /> : null}
 
             {isHost && !editable ? (
@@ -176,9 +219,17 @@ export default async function PlanDetail({
                     </button>
                   </form>
                 </>
-              ) : joined || pending ? (
+              ) : joined || attended || pending ? (
                 <>
                   <span className="badge badge-positive">{statusCopy[myParticipation!.status] ?? "You’re on this plan"}</span>
+                  {joined && planHasStarted ? (
+                    <form action={paceMarkPlanCompletedAction}>
+                      <input type="hidden" name="planId" value={plan.id} />
+                      <button type="submit" className="pace-primary">
+                        Mark completed
+                      </button>
+                    </form>
+                  ) : null}
                   <form action={paceLeavePlanAction}>
                     <input type="hidden" name="planId" value={plan.id} />
                     <button type="submit" className="pace-secondary">

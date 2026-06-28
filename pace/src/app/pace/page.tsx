@@ -64,7 +64,7 @@ export default async function PaceHome({
       confirmedCount: confirmedCounts.get(plan.id) ?? 0,
       visibility: plan.visibility,
       requiresApproval: plan.requires_approval,
-      host: { displayName: host?.display_name ?? "A Pace member", avatarUrl: host?.avatar_url ?? null },
+      host: { id: plan.host_id, displayName: host?.display_name ?? "A Pace member", avatarUrl: host?.avatar_url ?? null },
     };
   });
 

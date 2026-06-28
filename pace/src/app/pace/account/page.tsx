@@ -28,7 +28,7 @@ export default async function PaceAccount({
   if (!user) redirect("/pace/sign-in");
 
   const [{ data: profile }, { data: privateProfile }, { data: sportRows }] = await Promise.all([
-    supabase.from("pace_profiles").select("display_name,suburb,bio,created_at,is_private").eq("id", user.id).maybeSingle(),
+    supabase.from("pace_profiles").select("display_name,avatar_url,suburb,bio,created_at,is_private").eq("id", user.id).maybeSingle(),
     supabase.from("pace_profile_private").select("latitude,longitude,email_verified_at").eq("profile_id", user.id).maybeSingle(),
     supabase.from("pace_profile_sports").select("sport").eq("profile_id", user.id),
   ]);
@@ -68,10 +68,15 @@ export default async function PaceAccount({
                 ? new Date(profile.created_at).toLocaleDateString("en-AU", { dateStyle: "medium" })
                 : "—"}
             </p>
+            <Link href={`/pace/profile/${user.id}`} className="pace-secondary account-profile-link">
+              View profile
+            </Link>
           </div>
 
           <AccountForm
+            userId={user.id}
             displayName={profile?.display_name ?? ""}
+            avatarUrl={profile?.avatar_url ?? null}
             bio={profile?.bio ?? ""}
             mySports={mySports}
             isPrivate={profile?.is_private ?? false}

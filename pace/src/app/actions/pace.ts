@@ -10,6 +10,15 @@ import { clientIp, isRateLimited } from "@/lib/rate-limit";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
+const AVATAR_BUCKET = "avatars";
+const AVATAR_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+const ACTIVITY_PHOTOS_BUCKET = "activity-photos";
+const ACTIVITY_PHOTO_TYPES = AVATAR_TYPES;
+const ACTIVITY_PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+const ACTIVITY_PHOTO_MAX_COUNT = 6;
+const FORUM_CATEGORIES = ["Training", "Gear", "Events", "General"] as const;
+
 export async function paceSignUpAction(formData: FormData) {
   if (isRateLimited(`sign-up:${await clientIp()}`, 5, 10 * 60 * 1000)) {
     redirect(message("/pace/sign-up", "Too many attempts. Try again in a few minutes."));
@@ -39,7 +48,7 @@ export async function paceSignUpAction(formData: FormData) {
 
   const supabase = await createServerSupabaseClient();
   const origin = (await headers()).get("origin") ?? env.appUrl;
-  const { error } = await supabase!.auth.signUp({
+  const { data: signUpData, error } = await supabase!.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
@@ -48,6 +57,12 @@ export async function paceSignUpAction(formData: FormData) {
     },
   });
   if (error) redirect(message("/pace/sign-up", error.message));
+
+  const avatarFile = formData.get("avatar");
+  if (signUpData.user && avatarFile instanceof File && avatarFile.size > 0) {
+    await uploadSignUpAvatar(signUpData.user.id, avatarFile);
+  }
+
   redirect(`/pace/check-email?email=${encodeURIComponent(parsed.data.email)}`);
 }
 
@@ -179,6 +194,32 @@ export async function paceUpdateProfileAction(_prevState: ActionState, formData:
   redirect(withParam("/pace/account", "message", "Profile updated."));
 }
 
+async function uploadSignUpAvatar(userId: string, avatarFile: File): Promise<void> {
+  if (!hasSupabaseService) return;
+  if (!AVATAR_TYPES.has(avatarFile.type) || avatarFile.size > AVATAR_MAX_BYTES) return;
+
+  const serviceClient = createServiceSupabaseClient();
+  if (!serviceClient) return;
+
+  const path = `${userId}/signup-${Date.now()}.webp`;
+  const { error: uploadError } = await serviceClient.storage.from(AVATAR_BUCKET).upload(path, avatarFile, {
+    cacheControl: "31536000",
+    contentType: avatarFile.type,
+    upsert: true,
+  });
+  if (uploadError) return;
+
+  const { data: publicUrlData } = serviceClient.storage.from(AVATAR_BUCKET).getPublicUrl(path);
+  const { error: profileError } = await serviceClient
+    .from("pace_profiles")
+    .update({ avatar_url: publicUrlData.publicUrl })
+    .eq("id", userId);
+
+  if (profileError) {
+    await serviceClient.storage.from(AVATAR_BUCKET).remove([path]);
+  }
+}
+
 export async function paceDeleteAccountAction(formData: FormData) {
   if (String(formData.get("confirm") ?? "") !== "delete my account") {
     redirect(message("/pace/account/delete", "Type the confirmation phrase exactly to continue."));
@@ -263,6 +304,288 @@ export async function paceLeavePlanAction(formData: FormData) {
   redirect(withParam(returnTo, "message", "Done."));
 }
 
+export async function paceMarkPlanCompletedAction(formData: FormData) {
+  const planId = String(formData.get("planId") ?? "");
+  const fallback = `/pace/plan/${planId}`;
+  const returnTo = safeNextPath(formData.get("redirectTo"), fallback);
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) redirect(message(returnTo, "The Pace database is not configured yet."));
+  const { error } = await supabase.rpc("pace_mark_plan_completed", { target_plan: planId });
+  if (error) redirect(message(returnTo, error.message));
+
+  const { data: { user } } = await supabase.auth.getUser();
+  revalidatePath("/pace");
+  revalidatePath(`/pace/plan/${planId}`);
+  if (user) revalidatePath(`/pace/profile/${user.id}`);
+  redirect(withParam(returnTo, "message", "Marked as completed — nice one."));
+}
+
+export async function paceCreateActivityPostAction(formData: FormData) {
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) redirect(message("/pace/profile", "The Pace database is not configured yet."));
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/pace/sign-in");
+
+  const parsed = z.object({
+    caption: z.string().trim().max(1000).optional(),
+    planId: z.string().uuid().or(z.literal("")).optional(),
+  }).safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    redirect(message(`/pace/profile/${user.id}`, "Keep your caption under 1000 characters."));
+  }
+
+  const caption = parsed.data.caption || null;
+  const planId = parsed.data.planId || null;
+  const photos = formData
+    .getAll("photos")
+    .filter((candidate): candidate is File => candidate instanceof File && candidate.size > 0)
+    .slice(0, ACTIVITY_PHOTO_MAX_COUNT);
+
+  if (!caption && photos.length === 0) {
+    redirect(message(`/pace/profile/${user.id}`, "Add a caption or at least one photo."));
+  }
+
+  for (const photo of photos) {
+    if (!ACTIVITY_PHOTO_TYPES.has(photo.type)) {
+      redirect(message(`/pace/profile/${user.id}`, "Photos must be JPG, PNG or WebP."));
+    }
+    if (photo.size > ACTIVITY_PHOTO_MAX_BYTES) {
+      redirect(message(`/pace/profile/${user.id}`, "Keep each photo under 5MB."));
+    }
+  }
+
+  if (planId) {
+    const { data: linkablePlan } = await supabase
+      .from("pace_plan_participants")
+      .select("plan:pace_plans!inner(id,starts_at)")
+      .eq("profile_id", user.id)
+      .eq("plan_id", planId)
+      .in("status", ["confirmed", "attended"])
+      .maybeSingle();
+    const plan = Array.isArray(linkablePlan?.plan) ? linkablePlan.plan[0] : linkablePlan?.plan;
+    if (!plan || new Date(plan.starts_at).getTime() > Date.now()) {
+      redirect(message(`/pace/profile/${user.id}`, "Choose a past plan you joined."));
+    }
+  }
+
+  const { data: post, error: postError } = await supabase
+    .from("pace_activity_posts")
+    .insert({
+      user_id: user.id,
+      plan_id: planId,
+      entry_type: "manual",
+      caption,
+    })
+    .select("id")
+    .single();
+
+  if (postError || !post) {
+    redirect(message(`/pace/profile/${user.id}`, postError?.message ?? "Could not create that activity post."));
+  }
+
+  const serviceClient = createServiceSupabaseClient();
+  const uploadedPaths: string[] = [];
+
+  if (photos.length > 0 && !serviceClient) {
+    await supabase.from("pace_activity_posts").delete().eq("id", post.id);
+    redirect(message(`/pace/profile/${user.id}`, "Photo uploads are not configured yet."));
+  }
+
+  try {
+    const photoRows = [];
+    for (const [index, photo] of photos.entries()) {
+      const path = `${user.id}/${post.id}/${crypto.randomUUID()}.webp`;
+      const { error: uploadError } = await serviceClient!.storage.from(ACTIVITY_PHOTOS_BUCKET).upload(path, photo, {
+        cacheControl: "31536000",
+        contentType: photo.type,
+        upsert: false,
+      });
+      if (uploadError) throw uploadError;
+      uploadedPaths.push(path);
+      const { data: publicUrlData } = serviceClient!.storage.from(ACTIVITY_PHOTOS_BUCKET).getPublicUrl(path);
+      photoRows.push({
+        activity_post_id: post.id,
+        photo_url: publicUrlData.publicUrl,
+        storage_path: path,
+        sort_order: index,
+      });
+    }
+
+    if (photoRows.length) {
+      const { error: photosError } = await supabase.from("pace_activity_post_photos").insert(photoRows);
+      if (photosError) throw photosError;
+    }
+  } catch (activityError) {
+    if (uploadedPaths.length) {
+      await serviceClient?.storage.from(ACTIVITY_PHOTOS_BUCKET).remove(uploadedPaths);
+    }
+    await supabase.from("pace_activity_posts").delete().eq("id", post.id);
+    redirect(
+      message(
+        `/pace/profile/${user.id}`,
+        activityError instanceof Error ? activityError.message : "Could not upload those photos.",
+      ),
+    );
+  }
+
+  revalidatePath(`/pace/profile/${user.id}`);
+  redirect(withParam(`/pace/profile/${user.id}`, "message", "Activity posted."));
+}
+
+export async function paceDeleteActivityPostAction(formData: FormData) {
+  const postId = String(formData.get("postId") ?? "");
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) redirect(message("/pace/profile", "The Pace database is not configured yet."));
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/pace/sign-in");
+
+  const { data: photos } = await supabase
+    .from("pace_activity_post_photos")
+    .select("storage_path,post:pace_activity_posts!inner(user_id)")
+    .eq("activity_post_id", postId);
+
+  const ownedPhotos = (photos ?? []).filter((row) => {
+    const post = Array.isArray(row.post) ? row.post[0] : row.post;
+    return post?.user_id === user.id;
+  });
+
+  const { error } = await supabase
+    .from("pace_activity_posts")
+    .delete()
+    .eq("id", postId)
+    .eq("user_id", user.id);
+  if (error) redirect(message(`/pace/profile/${user.id}`, error.message));
+
+  const paths = ownedPhotos.map((photo) => photo.storage_path).filter(Boolean);
+  if (paths.length) {
+    await createServiceSupabaseClient()?.storage.from(ACTIVITY_PHOTOS_BUCKET).remove(paths);
+  }
+
+  revalidatePath(`/pace/profile/${user.id}`);
+  redirect(withParam(`/pace/profile/${user.id}`, "message", "Activity post deleted."));
+}
+
+export async function paceSendPlanMessageAction(_prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) return { error: "The Pace database is not configured yet." };
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/pace/sign-in");
+
+  const parsed = z.object({
+    planId: z.string().uuid(),
+    body: z.string().trim().min(1).max(2000),
+  }).safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) return { error: "Write a message before sending." };
+
+  const { error } = await supabase.from("pace_plan_messages").insert({
+    plan_id: parsed.data.planId,
+    sender_id: user.id,
+    body: parsed.data.body,
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/pace/plan/${parsed.data.planId}`);
+  return { sentAt: new Date().toISOString() };
+}
+
+export async function paceCreateForumPostAction(formData: FormData) {
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) redirect(message("/pace/forum", "The Pace database is not configured yet."));
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/pace/sign-in");
+
+  if (isRateLimited(`forum-post:${user.id}`, 1, 20 * 1000)) {
+    redirect(message("/pace/forum", "Give it a few seconds before posting again."));
+  }
+
+  const parsed = z.object({
+    title: z.string().trim().min(3).max(140),
+    body: z.string().trim().min(1).max(5000),
+    category: z.enum(FORUM_CATEGORIES).or(z.literal("")).optional(),
+  }).safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    redirect(message("/pace/forum", "Add a title and question before posting."));
+  }
+
+  const { data: post, error } = await supabase
+    .from("pace_forum_posts")
+    .insert({
+      author_id: user.id,
+      title: parsed.data.title,
+      body: parsed.data.body,
+      category: parsed.data.category || null,
+    })
+    .select("id")
+    .single();
+
+  if (error || !post) redirect(message("/pace/forum", error?.message ?? "Could not create that post."));
+  revalidatePath("/pace/forum");
+  redirect(`/pace/forum/${post.id}`);
+}
+
+export async function paceCreateForumReplyAction(formData: FormData) {
+  const postId = String(formData.get("postId") ?? "");
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) redirect(message(`/pace/forum/${postId}`, "The Pace database is not configured yet."));
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/pace/sign-in");
+
+  if (isRateLimited(`forum-reply:${user.id}`, 5, 60 * 1000)) {
+    redirect(message(`/pace/forum/${postId}`, "Slow down a touch before replying again."));
+  }
+
+  const parsed = z.object({
+    postId: z.string().uuid(),
+    body: z.string().trim().min(1).max(3000),
+  }).safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    redirect(message(`/pace/forum/${postId}`, "Write a reply before posting."));
+  }
+
+  const { error } = await supabase.from("pace_forum_replies").insert({
+    post_id: parsed.data.postId,
+    author_id: user.id,
+    body: parsed.data.body,
+  });
+
+  if (error) redirect(message(`/pace/forum/${parsed.data.postId}`, error.message));
+  revalidatePath("/pace/forum");
+  revalidatePath(`/pace/forum/${parsed.data.postId}`);
+  redirect(withParam(`/pace/forum/${parsed.data.postId}`, "message", "Reply posted."));
+}
+
+export async function paceDeleteForumPostAction(formData: FormData) {
+  const postId = String(formData.get("postId") ?? "");
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) redirect(message("/pace/forum", "The Pace database is not configured yet."));
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/pace/sign-in");
+
+  const { error } = await supabase.from("pace_forum_posts").delete().eq("id", postId).eq("author_id", user.id);
+  if (error) redirect(message(`/pace/forum/${postId}`, error.message));
+  revalidatePath("/pace/forum");
+  redirect(withParam("/pace/forum", "message", "Post deleted."));
+}
+
+export async function paceDeleteForumReplyAction(formData: FormData) {
+  const postId = String(formData.get("postId") ?? "");
+  const replyId = String(formData.get("replyId") ?? "");
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) redirect(message(`/pace/forum/${postId}`, "The Pace database is not configured yet."));
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/pace/sign-in");
+
+  const { error } = await supabase.from("pace_forum_replies").delete().eq("id", replyId).eq("author_id", user.id);
+  if (error) redirect(message(`/pace/forum/${postId}`, error.message));
+  revalidatePath(`/pace/forum/${postId}`);
+  redirect(withParam(`/pace/forum/${postId}`, "message", "Reply deleted."));
+}
+
 export async function paceSearchProfilesAction(planId: string, query: string): Promise<Array<{ id: string; displayName: string }>> {
   const trimmed = query.trim();
   if (trimmed.length < 2) return [];
@@ -323,7 +646,7 @@ export async function paceReportPlanAction(formData: FormData) {
   redirect(withParam("/pace", "message", "Thanks — a beta admin will review this report."));
 }
 
-export type ActionState = { error?: string };
+export type ActionState = { error?: string; sentAt?: string };
 
 const planFormSchema = z.object({
   title: z.string().trim().min(3).max(100),

@@ -8,16 +8,20 @@ export const dynamic = "force-dynamic";
 export default async function Onboarding() {
   const supabase = await createServerSupabaseClient();
   let displayName = "";
+  let avatarUrl: string | null = null;
+  let userId = "";
   if (supabase) {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
+      userId = user.id;
       const { data: profile } = await supabase
         .from("pace_profiles")
-        .select("display_name")
+        .select("display_name,avatar_url")
         .eq("id", user.id)
         .maybeSingle();
       // Falls back to what was typed at sign-up, set automatically when the account was created.
       displayName = profile?.display_name ?? "";
+      avatarUrl = profile?.avatar_url ?? null;
     } else {
       redirect("/pace/sign-in");
     }
@@ -26,7 +30,7 @@ export default async function Onboarding() {
   return (
     <main className="pace-auth pace-auth-inner">
       <PaceAuthBrand />
-      <OnboardingForm displayName={displayName} />
+      <OnboardingForm userId={userId} displayName={displayName} avatarUrl={avatarUrl} />
     </main>
   );
 }

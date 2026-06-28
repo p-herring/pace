@@ -3,9 +3,18 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { paceSaveOnboardingAction } from "@/app/actions/pace";
+import { AvatarUploader } from "@/components/avatar-uploader";
 import { LocationPicker } from "@/components/location-picker";
 
-export function OnboardingForm({ displayName }: { displayName: string }) {
+export function OnboardingForm({
+  userId,
+  displayName,
+  avatarUrl,
+}: {
+  userId: string;
+  displayName: string;
+  avatarUrl?: string | null;
+}) {
   const [state, formAction] = useActionState(paceSaveOnboardingAction, {});
 
   return (
@@ -13,6 +22,7 @@ export function OnboardingForm({ displayName }: { displayName: string }) {
       <p className="pace-kicker">Profile setup</p>
       <h1>Set your starting line.</h1>
       {state?.error && <p className="form-error">{state.error}</p>}
+      <AvatarUploader userId={userId} displayName={displayName || "Pace member"} avatarUrl={avatarUrl} />
       <label>
         Display name
         <input name="displayName" required maxLength={40} defaultValue={displayName} />
